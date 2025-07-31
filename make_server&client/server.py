@@ -22,9 +22,16 @@ def edit_docs(docs_id: str, new_docs: str) -> bool:
     docs[docs_id] = new_docs
     return True
 
+# resource
+@mcp.resource("docs://document", description="A collection of document avalible on the server", mime_type="application/json")
+def list_docs():
+    "List all availble documents"
+    return (docs.keys())
+
 mcp_app = mcp.streamable_http_app()
 
 
 #           run server
 # uvicorn server:mcp_app --port 8001
+# uvicorn server:mcp_app --reload
  
