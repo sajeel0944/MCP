@@ -1,8 +1,3 @@
-#                   part 1
-
-
-print("\n\n\n\t\t\t\t\t part 1 \n\n\n")
-
 import requests
 
 url = "http://127.0.0.1:8000/mcp/"
@@ -11,168 +6,17 @@ header = {
     "Accept": "application/json, text/event-stream"
 }
 
-body_1 : list = {
-    "jsonrpc": "2.0",
-    "method": "tools/list",
-    "params": {},
-    "id": 1
-}
-
-response_1 = requests.post(url, headers=header, json=body_1)
-print("\n\n✅ MCP Response: Read All Tool Schema\n")
-print(response_1.text)
-
-
-
-body_2 = {
+body = {
   "jsonrpc": "2.0",
   "id": 2,
   "method": "tools/call",
   "params": {
-    "name": "read_docs",
+    "name": "weather",
     "arguments": {
-      "docs_id": "plan.md"
+      "name": "sunny"
     }
   }
 }
 
-response_2 = requests.post(url, headers=header, json=body_2)
-print("\n\n✅ MCP Response: Read Docs\n")
-print(response_2.text)
-
-
-
-body_3 = {
-  "jsonrpc": "2.0",
-  "id": 2,
-  "method": "tools/call",
-  "params": {
-    "name": "edit_docs",
-    "arguments": {
-      "docs_id": "plan.md",
-      "new_docs": "The implementation strategy for the project is laid out in this plan."
-    }
-  }
-}
-
-response_3 = requests.post(url, headers=header, json=body_3)
-print("\n\n✅ MCP Response: Edit Docs\n")
-print(response_3.text)
-
-
-
-
-
-# -----------------------------------------------part 2--------------------------------------------------------------
-
-print("\n\n\n\t\t\t\t\t part 2 \n\n\n")
-
-import asyncio
-from mcp.client.streamable_http import streamablehttp_client
-from mcp import ClientSession, types
-
-# MCP server URL
-url = "http://127.0.0.1:8000/mcp/"
-
-async def main():
-    # Use async context manager properly and unpack the returned values
-    async with streamablehttp_client(url) as (read_stream, write_stream, _):
-        async with ClientSession(read_stream, write_stream) as session:
-            await session.initialize()
-
-            result_1 = await session.list_tools()
-            print("\n\n✅ MCP Response: Read All Tool Schema\n")
-            print(result_1)
-
-
-            result_2 = await session.call_tool(
-                name="read_docs",
-                arguments={"docs_id": "plan.md"}
-            )
-            print("\n\n✅ MCP Response: Read Docs\n")
-            print(result_2)
-
-            result_3 = await session.call_tool(
-                name="edit_docs",
-                arguments={"docs_id": "plan.md", "new_docs": "The implementation strategy for the project is laid out in this plan."}
-            )
-            print("\n\n✅ MCP Response: Edit Docs \n")
-            print(result_3)
-        
-# Run it
-asyncio.run(main())
-
-
-
-
-
-# -----------------------------------------------part 3--------------------------------------------------------------
-
-print("\n\n\n\t\t\t\t\t part 3 \n\n\n")
-
-import asyncio
-from mcp.client.streamable_http import streamablehttp_client
-from mcp import ClientSession, types
-from contextlib import AsyncExitStack
-
-class MCPClient:
-    def __init__(self, url):
-      self.url = url
-      self.stack = AsyncExitStack()
-      self._sess = None
-    
-    async def __aenter__(self):
-        read, write, _ = await self.stack.enter_async_context(
-            streamablehttp_client(self.url)
-        )
-        self._sess = await self.stack.enter_async_context(
-            ClientSession(read, write)
-        )
-        await self._sess.initialize()
-        return self
-
-    async def __aexit__(self, *args):
-        await self.stack.aclose()
-
-    async def list_tools(self) -> list[types.Tool]:
-        result : types.ListToolsResult = await self._sess.list_tools()
-        return result.tools
-    
-    async def call_tool(self, tool_name, *args, **kwargs) -> types.CallToolResult:
-        result : types.CallToolResult = await self._sess.call_tool(tool_name, *args, **kwargs) 
-        return result
-    
-    async def list_resources(self) -> list[types.Resource]:
-        result : types.ListResourcesResult = await self._sess.list_resources()
-        return result.resources
-    
-
-async def main_2():
-    async with MCPClient("http://127.0.0.1:8000/mcp/") as client:
-      tools_list : list[types.Tool] = await client.list_tools()
-      print("\n\n✅ MCP Response: Read All Tool Schema\n")
-      print(tools_list)
-
-
-      tool_read = await client.call_tool(
-        "read_docs",
-        {"docs_id": "plan.md"}
-      )
-      print("\n\n✅ MCP Response: Read Docs\n")
-      print(tool_read
-      )
-
-
-      tool_edit = await client.call_tool(
-        "edit_docs",
-        {"docs_id": "plan.md", "new_docs": "The implementation strategy for the project is laid out in this plan."}
-      )
-      print("\n\n✅ MCP Response: Edit Docs\n")
-      print(tool_edit)
-
-
-      resourse : list[types.Resource] = await client.list_resources() 
-      print("\n\n✅ MCP Response: Read Resourse\n")
-      print(resourse)
-
-asyncio.run(main_2())
+response = requests.post(url, headers=header, json=body)
+print(response.text)
